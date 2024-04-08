@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EA 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ea1.css')}}" id="ea1-css">
+    <script src="{{ url_for('static', filename='script/ea1.js') }}"></script>
+    <!--p5-->
+    <script src="{{ url_for('static', filename='p5.js') }}"></script>
+    <!--ml5-->
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <!-- Your body content -->
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>EA 1</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='dashboard'>Dashboard</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='tutorials'>Tutorials</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a class='selectedmenu' href='dashboard'>Dashboard</a>
+        </div>
+        <div>
+            <a class='selectedmenu' href='tutorials'>Tutorials</a>
+            <a>EA 1</a>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <br>
+
+    <!--
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+    
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+        ##########################################################
+    -->
+    
+    <!-- Your body content -->
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline">
+                <a>EA 1: Image classification with ml5</a>
+            </div>
+            <div class="imageside" id="drop-zone" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+                <div id="image-container"></div> <!-- Container for the dropped image -->
+                Select an image or drag a file
+                <br><br>
+                <input type="file" accept="image/*" onchange="handleFiles(this.files)">
+            </div>
+            <div class="resultside">
+                <div class="classify">
+                    <!-- Button to classify the image -->
+                    1. classify with ml5
+                </div>
+                <div class="results">
+                    <a style="text-decoration: underline;">results take a few seconds</a><br>
+                    <!--
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                    
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+                    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js" type="text/javascript"></script>
+                    <div id="result"></div>
+                    <script src="{{ url_for('static', filename='ea1-ml5.js') }}"></script>
+                    
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                        ##########################################################
+                    -->
+                </div>
+                <div class="evaluate">
+                    2. classified correctly?
+                    <br><br>
+                    <button type="button" style="color: red;">incorrect</button> 
+                    <button type="button" style="color: green;">correct</button> 
+                </div>
+                <div class="save">
+                    3. save image?
+                    <br><br>
+                    <button type="button" style="color: red;">discard</button> 
+                    <button type="button" style="color: green;">save</button> 
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="correct-classified-images">
+                correct-classified-images
+            </div>
+            <div class="correct-resultside">
+                results
+            </div>
+          </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="incorrect-classified-images">
+                incorrect-classified-images
+            </div>
+            <div class="incorrect-resultside">
+                results
+            </div>
+          </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="ea1-report">
+                EA1 Download report
+                <br>
+                <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
+            </div>
+          </div>
+    </section>
+    
+    <br>
+    <br><br>
+    <footer>
+        <a href='imprint'>Imprint</a>
+    </footer>
+</body>
+</html>

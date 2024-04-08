@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link id="theme-css" rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Function to detect user's preferred color scheme
+            function detectColorScheme() {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                } else {
+                    return 'light';
+                }
+            }
+
+            // Load appropriate CSS based on color scheme
+            var colorScheme = detectColorScheme();
+            var themeCss = '/static/css/login-' + colorScheme + '.css';
+            document.getElementById('theme-css').setAttribute('href', themeCss);
+
+            // Send color scheme to Flask
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/update_color_scheme", true);
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+            xhr.send(JSON.stringify({color_scheme: colorScheme}));
+        });
+    </script>
+</head>
+<body>
+    <form method="post" action="/">
+        <h2>Login</h2>
+        {% if error %}
+            <p class="error-message">Invalid credentials. Please try again.</p>
+        {% endif %}
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br><br>
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>

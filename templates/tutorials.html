@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorials</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css')}}" id="tutorial-css">
+    <script src="{{ url_for('static', filename='script/tutorial.js') }}"></script>
+</head>
+<body>
+
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>Tutorials</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='dashboard'>Dashboard</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='EA1'>EA 1</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a class='selectedmenu' href='dashboard'>Dashboard</a>
+        </div>
+        <div>
+            <a>Tutorials</a>
+            <a class='selectedmenu' href='EA1'>EA 1</a>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <section>
+        <h2>Welcome to my website!</h2>
+        <p>Tutorials coming soon</p>
+    </section>
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline">
+                <a>EA 1: Image classification with ml5</a>
+            </div>
+            <video width="320" height="180" controls>
+                <source src="{{ url_for('serve_video', filename='beispiel.mp4') }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+          </div>
+    </section>
+    <br>
+    <br><br>
+    <footer>
+        <a href='imprint'>Imprint</a>
+    </footer>
+</body>
+</html>
