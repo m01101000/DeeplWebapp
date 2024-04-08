@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = 'dABSADFV64F4DY3V1<SDFSDA36V14SD<6FXCGDdybgsdvs<cfsaVSFGBH+6SF5B6S1DV'
+app.secret_key = 'abcdefg'
 
 # Verzeichnis für hochgeladene Bilder festlegen
 UPLOAD_FOLDER = 'static/uploads'
