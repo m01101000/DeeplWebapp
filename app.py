@@ -6,22 +6,9 @@ import sqlite3
 app = Flask(__name__)
 app.secret_key = 'dABSADFV64F4DY3V1<SDFSDA36V14SD<6FXCGDdybgsdvs<cfsaVSFGBH+6SF5B6S1DV'
 
-# Define the upload folder
+# Verzeichnis für hochgeladene Bilder festlegen
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'jpg'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-
-
-
-
-
-
-
 
 # Funktion zum Überprüfen der Anmeldeinformationen
 def authenticate(username, password):
@@ -31,6 +18,8 @@ def authenticate(username, password):
     user = cursor.fetchone()
     conn.close()
     return user
+
+##############################################################
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -49,11 +38,19 @@ def login():
             error = True
     return render_template('login.html', error=error)
 
+##############################################################
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     session.pop('password', None)
+    session.pop('user_file_name', None)
     return redirect(url_for('login'))
+
+##############################################################
+
+analyzedimages = '7'
+averageconfidence = '0.19'
 
 @app.route('/dashboard')
 def dashboard():
@@ -62,8 +59,10 @@ def dashboard():
         password = session['password']
         user = authenticate(username, password)
         if user:
-            return render_template('dashboard.html', username=username)
+            return render_template('dashboard.html', username=username, analyzedimages=analyzedimages, averageconfidence=averageconfidence)
     return redirect(url_for('login'))
+
+##############################################################
 
 @app.route('/tutorials')
 def tutorials():
@@ -80,6 +79,17 @@ def serve_video(filename):
     return send_from_directory('static/tutorials', filename)
 
 ##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
 
 @app.route('/EA1', methods=['GET', 'POST'])
 def ea1():
@@ -88,28 +98,76 @@ def ea1():
         password = session['password']
         user = authenticate(username, password)
         if user:
-            if request.method == 'POST':
-                # Überprüfen, ob die POST-Anfrage ein Dateiobjekt enthält
-                if 'file' not in request.files:
-                    flash('No file part')
-                    return redirect(request.url)
-                file = request.files['file']
-                # Überprüfen, ob eine Datei hochgeladen wurde
-                if file.filename == '':
-                    flash('No selected file')
-                    return redirect(request.url)
-                if file and allowed_file(file.filename):
-                    # Sicheres Speichern der Datei
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    flash('File successfully uploaded')
-                    return redirect(url_for('ea1'))
-                else:
-                    flash('Invalid file extension')
-                    return redirect(request.url)
-            return render_template('EA1.html')
+            user_file_name = session.get('user_file_name')
+            path = session.get('path')
+            return render_template('EA1.html', username=username, user_file_name=user_file_name, path=path)
     return redirect(url_for('login'))
 
+@app.route('/EA1upload', methods=['POST'])
+def upload():
+    if 'username' in session and 'password' in session:
+        username = session['username']
+        password = session['password']
+        user = authenticate(username, password)
+        if user:
+
+            # Check if 'image' is in request.files
+            if 'image' not in request.files:
+                session.pop('user_file_name', None)
+                return redirect(url_for('ea1'))
+
+            file = request.files['image']
+            uploadBy = request.form['uploadBy']
+
+            # Check if a file is selected
+            if file.filename == '':
+                session.pop('user_file_name', None)
+                return redirect(url_for('ea1'))
+
+            # Ensure the file has an allowed extension
+            if file and allowed_file(file.filename):
+                # Set the filename as username_file.ext
+                filename = secure_filename(uploadBy + '_' + file.filename)
+                user_folder = os.path.join(app.config['UPLOAD_FOLDER'], uploadBy)
+
+                # Create the user's folder if it doesn't exist
+                if not os.path.exists(user_folder):
+                    os.makedirs(user_folder)
+
+                file_path = os.path.join(user_folder, filename)
+
+                # Check if a file with the same username prefix already exists, if so, remove it
+                existing_files = [f for f in os.listdir(user_folder) if f.startswith(uploadBy + '_')]
+                for existing_file in existing_files:
+                    os.remove(os.path.join(user_folder, existing_file))
+
+                # Save the file
+                file.save(file_path)
+
+                # Update session with the filename
+                session['user_file_name'] = filename
+                return redirect(url_for('ea1'))
+            else:
+                return 'fehler'
+            
+
+        return render_template('EA1.html')
+
+def allowed_file(filename):
+    # Prüfen, ob die Dateiendung zulässig ist
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
+##############################################################
 ##############################################################
 
 @app.route('/imprint')
