@@ -5,7 +5,7 @@ connection = sqlite3.connect('user.db')
 cursor = connection.cursor()
 
 # Daten einfügen
-cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("Mustermann", "Mustermann"))
+cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("Max", "Tester1"))
 
 # Daten abrufen
 cursor.execute('SELECT * FROM users')
