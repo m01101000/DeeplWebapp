@@ -89,7 +89,7 @@
         margin: 1rem;
       }
       .resultside .save button {
-        width: 49%;
+        width: 99%;
         height: 2rem;
         background-color: rgba(185, 185, 185, 0.1);
         border-color: rgba(185, 185, 185, 0.4);
@@ -101,37 +101,43 @@
         margin: 1rem;
       }
       .resultside .discard button {
-        width: 49%;
+        width: 99%;
         height: 2rem;
         background-color: rgba(185, 185, 185, 0.1);
         border-color: rgba(185, 185, 185, 0.4);
         border-style: solid;
       }
 
-      .correct-classified-images {
-        grid-column: 1 / 3;
+      .correct-resultside {
+        grid-column: 1 / 5;
         text-align: left;
         color: #F6F6F2;
         margin: 1rem;
       }
-      .correct-resultside {
-        grid-column: 3 / 5;
-        text-align: left;
-        color: #F6F6F2;
-        margin: 1rem;
+      .correct-resultside .images {
+        width: 30%;
+      }
+      .correct-resultside img {
+        width: 100px;
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+        margin-right: 1rem;
       }
       
-      .incorrect-classified-images {
-        grid-column: 1 / 3;
+      .incorrect-resultside {
+        grid-column: 1 / 5;
         text-align: left;
         color: #F6F6F2;
         margin: 1rem;
       }
-      .incorrect-resultside {
-        grid-column: 3 / 5;
-        text-align: left;
-        color: #F6F6F2;
-        margin: 1rem;
+      .incorrect-resultside .images {
+        width: 30%;
+      }
+      .incorrect-resultside img {
+        width: 100px;
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+        margin-right: 1rem;
       }
 
       .ea1-report {
@@ -254,26 +260,35 @@
         border-style: solid;
       }
 
-      .correct-classified-images {
-        grid-column: 1 / 3;
+      .correct-resultside {
+        grid-column: 1 / 5;
         text-align: left;
         color: #F6F6F2;
       }
-      .correct-resultside {
-        grid-column: 3 / 5;
-        text-align: left;
-        color: #F6F6F2;
+      .correct-resultside .images {
+        width: 40%;
+      }
+      .correct-resultside img {
+        width: 200px;
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+        margin-right: 1rem;
       }
       
-      .incorrect-classified-images {
-        grid-column: 1 / 3;
-        text-align: left;
-        color: #F6F6F2;
-      }
       .incorrect-resultside {
-        grid-column: 3 / 5;
+        grid-column: 1 / 5;
         text-align: left;
         color: #F6F6F2;
+        margin: 1rem;
+      }
+      .incorrect-resultside .images {
+        width: 30%;
+      }
+      .incorrect-resultside img {
+        width: 200px;
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+        margin-right: 1rem;
       }
 
       .ea1-report {

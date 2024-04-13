@@ -51,8 +51,8 @@ def logout():
 
 ##############################################################
 
-analyzedimages = '7'
-averageconfidence = '0.19'
+analyzedimages = 0
+averageconfidence = 0
 
 @app.route('/dashboard')
 def dashboard():
@@ -61,6 +61,41 @@ def dashboard():
         password = session['password']
         user = authenticate(username, password)
         if user:
+            analyzedimages = 0
+            averageconfidence = 0
+            db_path = 'static/userfiles/EA1/' + username + '/imagedata/' + (username + '_imagedata.db')
+
+            if os.path.exists(db_path):
+                # Verbindung zur Datenbank herstellen
+                connection = sqlite3.connect(db_path)
+                cursor = connection.cursor()
+                # Daten abrufen
+                cursor.execute('SELECT * FROM imagedata')
+                data = cursor.fetchall()
+                
+                #Anzahl der Bilder
+                analyzedimages = len(data)
+
+                # Initialize sum of second elements
+                sum_second_elements = 0
+
+                # Iterate through the tuples and sum up the second elements
+                for tup in data:
+                    sum_second_elements += tup[1]  # Assuming the second element is always at index 1
+
+                # Calculate the average
+                averageconfidence = sum_second_elements / len(data)
+                # Begrenzung auf zwei Nachkommastellen
+                averageconfidence = round(averageconfidence, 2)
+
+                # Änderungen speichern
+                connection.commit()
+                # Verbindung schließen
+                cursor.close()
+                # connection.close()
+            else:
+                print("No images saved.")
+
             return render_template('dashboard.html', username=username, analyzedimages=analyzedimages, averageconfidence=averageconfidence)
     return redirect(url_for('login'))
 
@@ -95,7 +130,35 @@ def ea1():
                 user_file_name = ""
             if 'path' not in session:
                 path = ""
-            return render_template('EA1.html', username=username, user_file_name=user_file_name, path=path)
+
+            # Define the path to the database file
+            db_path = 'static/userfiles/EA1/' + username + '/imagedata/' + (username + '_imagedata.db')
+            saved_correct_Images = ''
+            saved_incorrect_Images = ''
+
+            # Check if the file exists
+            if os.path.exists(db_path):
+                # Verbindung zur Datenbank herstellen
+                saved_correct_Images = ''
+                connection = sqlite3.connect(db_path)
+                cursor = connection.cursor()
+                # Daten abrufen
+                cursor.execute('SELECT * FROM imagedata WHERE evaluation = "correct"')
+                saved_correct_Images = cursor.fetchall()
+                # Daten abrufen
+                cursor.execute('SELECT * FROM imagedata WHERE evaluation = "incorrect"')
+                saved_incorrect_Images = cursor.fetchall()
+
+                # Änderungen speichern
+                connection.commit()
+                # Verbindung schließen
+                cursor.close()
+                # connection.close()
+            else:
+                print("No images saved.")
+
+            return render_template('EA1.html', username=username, user_file_name=user_file_name, path=path, saved_correct_Images=saved_correct_Images, saved_incorrect_Images=saved_incorrect_Images)
+
     return redirect(url_for('login'))
 
 @app.route('/EA1upload', methods=['POST'])
@@ -197,7 +260,10 @@ def ea1storage():
             cursor = connection.cursor()
 
             user_file_name = session['user_file_name']
-            usernme_imagepath = (user_directory_imagedata + '/' + user_file_name)
+
+            user_directory_imagedata12 = (user_directory_imagedata.replace('static/', ''))
+            user_directory_imagedata1 = (user_directory_imagedata12.replace('/imagedata/', '/'))
+            usernme_imagepath = (user_directory_imagedata1 + user_file_name)
 
             # Tabellen erstellen, wenn sie nicht existieren
             cursor.execute('''
@@ -220,7 +286,7 @@ def ea1storage():
             connection = sqlite3.connect('static/userfiles/EA1/' + username + '/imagedata/' + (username + '_imagedata.db'))
             cursor = connection.cursor()
             # Daten einfügen
-            cursor.execute("INSERT INTO imagedata (SAVE_confidence, SAVE_label, evaluation, Imagepath) VALUES (?, ?, ?, ?)", (SAVE_confidence, SAVE_label, evaluation, usernme_imagepath))
+            cursor.execute("INSERT INTO imagedata (SAVE_confidence, SAVE_label, evaluation, usernme_imagepath) VALUES (?, ?, ?, ?)", (SAVE_confidence, SAVE_label, evaluation, usernme_imagepath))
             # Daten abrufen
             cursor.execute('SELECT * FROM imagedata')
             data = cursor.fetchall()

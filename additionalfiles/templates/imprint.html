@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprint</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/imprint.css')}}" id="imprint-css">
+    <script src="{{ url_for('static', filename='script/imprint.js') }}"></script>
+</head>
+<body>
+
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>Imprint</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='dashboard'>Dashboard</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='tutorials'>Tutorials</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='EA1'>EA 1</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a class='selectedmenu' href='dashboard'>Dashboard</a>
+        </div>
+        <div>
+            <a class='selectedmenu' href='tutorials'>Tutorials</a>
+            <a class='selectedmenu' href='EA1'>EA 1</a>
+            <a style='color:rgba(185, 185, 185, 0.3); text-decoration: line-through;'>EA 2</a>
+            <a style='color:rgba(185, 185, 185, 0.3); text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline">
+                <a>There is no obligation to provide an imprint within the scope of the legal provisions.</a>
+            </div>
+          </div>
+    </section>
+    <br>
+    <br><br>
+    <footer>
+        <a>Imprint</a>
+    </footer>
+</body>
+</html>

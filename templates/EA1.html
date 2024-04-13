@@ -174,22 +174,48 @@
 
     <section id="section">
         <div class="grid-container-2">
-            <div class="correct-classified-images">
-                correct-classified-images
+            <div class="headline">
+                <a>correct-classified-images</a>
             </div>
             <div class="correct-resultside">
-                results
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_correct_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[2] }}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table> 
             </div>
           </div>
     </section>
 
     <section id="section">
         <div class="grid-container-2">
-            <div class="incorrect-classified-images">
-                incorrect-classified-images
+            <div class="headline">
+                <a>incorrect-classified-images</a>
             </div>
             <div class="incorrect-resultside">
-                results
+                <table name="incorrect_imagedata" method="GET">
+                    {% for imagedata in saved_incorrect_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[2] }}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>                
             </div>
           </div>
     </section>

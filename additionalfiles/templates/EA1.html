@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EA 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ea1.css')}}" id="ea1-css">
+    <script src="{{ url_for('static', filename='script/ea1.js') }}"></script>
+    <!--p5-->
+    <script src="{{ url_for('static', filename='script/p5.min.js') }}"></script>
+    <!--ml5-->
+    <script src="https://unpkg.com/ml5@0.6.1/dist/ml5.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <!-- Your body content -->
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>EA 1</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='dashboard'>Dashboard</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='tutorials'>Tutorials</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a class='selectedmenu' href='dashboard'>Dashboard</a>
+        </div>
+        <div>
+            <a class='selectedmenu' href='tutorials'>Tutorials</a>
+            <a>EA 1</a>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <br>
+    
+    <!-- Your body content -->
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline">
+                <a>EA 1: Image classification with ml5</a>
+            </div>
+            <div class="imageside">
+                <div class="imageupload_display" style="text-align: center;">
+                    <form action="/EA1upload" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="image" accept="image/*" class="custom-file-input">
+                        <input type="hidden" name="uploadBy" value="{{ username }}">
+                        <input type="submit" value="Upload Image">
+                    </form>
+                    {% if user_file_name %}
+                        <img id="loadedImage" src="{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}" style="margin-bottom: 1rem;"/>
+                    {% endif %}
+                    <div id="img" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="resultside">
+                <div class="classify">
+                    1. upload your picture 
+                </div>
+                <form action="/EA1storage" method="POST" enctype="multipart/form-data">
+                    <div class="results">
+                        <a style="text-decoration: underline;">results take a few seconds</a>
+                        <br>
+
+                        <input type="hidden" id="label_input" name="SAVE_label">
+                        <input type="hidden" id="confidence_input" name="SAVE_confidence">
+
+                        <div id="classification_result" style="margin: 1rem;"></div>
+                        
+                        <script>
+                            let classifier;
+                            let img;
+                                            
+                            function preload() {
+                                classifier = ml5.imageClassifier('MobileNet');
+                                img = loadImage("{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}");
+                            }
+                                        
+                            function setup() {
+                                createCanvas(400, 400);
+                                classifier.classify(img, gotResult);
+                                let imgElement = createImg(img.src); // Create img element
+                                imgElement.parent('img'); // Append img element to 'img' div
+                            }
+                                            
+                            function gotResult(error, results) {
+                                if (error) {
+                                    console.error(error);
+                                }
+                                console.log(results);
+                                let label = results[0].label;
+                                let confidence = nf(results[0].confidence, 0, 2);
+
+                                // Check if the label is "window screen"
+                                if (label.toLowerCase() === "window screen") {
+                                    label = ""; // Set label to empty string
+                                    confidence = ""; // Set confidence to empty string
+                                }
+
+                                // Set the label and confidence in hidden input fields
+                                document.getElementById('label_input').value = label;
+                                document.getElementById('confidence_input').value = confidence;
+
+                                let resultDiv = createDiv(`Label: ${label}<br><br>`); // Create div for label
+                                resultDiv.parent('classification_result'); // Append div to 'results' div
+                                let confidenceDiv = createDiv(`Confidence: ${confidence}`); // Create div for confidence
+                                confidenceDiv.parent('classification_result'); // Append div to 'results' div
+                            }
+                        </script>
+                    </div>
+                    <div class="evaluate">
+                        2. classified correctly?
+                        <br><br>
+                        <button type="button" style="color: red;" onclick="setEvaluation('incorrect')">incorrect</button>
+                        <button type="button" style="color: green;" onclick="setEvaluation('correct')">correct</button>
+                        <input type="hidden" id="evaluationInput" name="evaluation" value="">
+                        
+                        <script>
+                            function setEvaluation(value) {
+                                document.getElementById('evaluationInput').value = value;
+                                const buttons = document.querySelectorAll('.evaluate button');
+                                buttons.forEach(button => {
+                                    button.style.color = 'black'; // Reset color of all buttons
+                                });
+                                const selectedButton = document.querySelector(`.evaluate button[onclick="setEvaluation('${value}')"`);
+                                selectedButton.style.color = value === 'correct' ? 'green' : 'red'; // Highlight selected button
+                            }
+                        
+                            document.getElementById('evaluationForm').addEventListener('submit', function (event) {
+                                const evaluationValue = document.getElementById('evaluationInput').value;
+                                if (!evaluationValue) {
+                                    event.preventDefault(); // Prevent form submission if no evaluation is selected
+                                    alert('Please select an evaluation (correct/incorrect)');
+                                }
+                            });
+                        </script>
+                    </div>
+                    <div class="save">
+                        3. save image?
+                        <br><br>
+                        <!--<button type="button" style="color: red;">discard</button>--> 
+                        <button type="submit" style="color: green;">save</button> 
+                    </div>
+                </form>
+                <form action="/EA1discard" method="POST" enctype="multipart/form-data">
+                    <div class="discard">
+                        <button type="submit" style="color: red;">discard</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="headline">
+                <a>correct-classified-images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_correct_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[2] }}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table> 
+            </div>
+          </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="headline">
+                <a>incorrect-classified-images</a>
+            </div>
+            <div class="incorrect-resultside">
+                <table name="incorrect_imagedata" method="GET">
+                    {% for imagedata in saved_incorrect_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[2] }}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>                
+            </div>
+          </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="ea1-report">
+                EA1 Download report
+                <br>
+                <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
+            </div>
+          </div>
+    </section>
+    
+    <br>
+    <br><br>
+    <footer>
+        <a href='imprint'>Imprint</a>
+    </footer>
+</body>
+</html>
