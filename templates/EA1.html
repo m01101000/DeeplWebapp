@@ -63,11 +63,69 @@
             </div>
             <div class="imageside">
                 <div class="imageupload_display" style="text-align: center;">
-                    <form action="/EA1upload" method="POST" enctype="multipart/form-data">
-                        <input type="file" name="image" accept="image/*" class="custom-file-input">
-                        <input type="hidden" name="uploadBy" value="{{ username }}">
-                        <input type="submit" value="Upload Image">
-                    </form>
+                    <div class="dragDropArea" id="dragDropArea">
+                        <p>Upload or Drag & Drop your image here (400x400px)</p>
+                        <form id="imageUploadForm" action="/EA1upload" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageInput" name="image" accept="image/*" class="custom-file-input">
+                            <input type="hidden" name="uploadBy" value="{{ username }}">
+                        </form>
+                    </div>
+                    <script>
+                        var dragDropArea = document.getElementById('dragDropArea');
+                        var imageInput = document.getElementById('imageInput');
+                        var imagePreview = document.getElementById('imagePreview');
+                    
+                        dragDropArea.addEventListener('dragover', function(event) {
+                            event.preventDefault();
+                        });
+                    
+                        dragDropArea.addEventListener('dragleave', function(event) {
+                            event.preventDefault();
+                        });
+                    
+                        dragDropArea.addEventListener('drop', function(event) {
+                            event.preventDefault();
+                    
+                            var files = event.dataTransfer.files;
+                            imageInput.files = files;
+                    
+                            var file = files[0]; // Assuming only one file is selected
+                            if (file) {
+                                var reader = new FileReader();
+                                reader.onload = function(e) {
+                                    var img = new Image();
+                                    img.onload = function() {
+                                        if (img.width === 400 && img.height === 400) {
+                                            uploadImage(file);
+                                        } else {
+                                            alert("Please upload an image with dimensions exactly 400x400 pixels.");
+                                        }
+                                    };
+                                    img.src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        });
+                    
+                        function uploadImage(file) {
+                            var form = document.getElementById('imageUploadForm');
+                            var formData = new FormData(form);
+                            formData.append('image', file);
+                    
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', form.action, true);
+                            xhr.onload = function() {
+                                // Handle upload success
+                                console.log('Upload successful');
+                                location.reload(); // Reload the page after successful upload
+                            };
+                            xhr.onerror = function() {
+                                // Handle upload error
+                                console.error('Upload failed');
+                            };
+                            xhr.send(formData);
+                        }
+                    </script>
                     {% if user_file_name %}
                         <img id="loadedImage" src="{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}" style="margin-bottom: 1rem;"/>
                     {% endif %}
@@ -174,8 +232,151 @@
 
     <section id="section">
         <div class="grid-container-2">
+            <div class="headline" style="color: rgb(0, 128, 0, 0.5);">
+                <a>example - correct classified images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_correct %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="0plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('0plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [(value * 100) + '%'],
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="headline" style="color: rgb(255, 0, 0, 0.5);">
+                <a>example - incorrect classified images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_incorrect %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="1plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('1plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [(value * 100) + '%'],
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+    
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
             <div class="headline">
-                <a>correct-classified-images</a>
+                <a>your correct classified images</a>
             </div>
             <div class="correct-resultside">
                 <table name="correct_imagedata" method="GET">
@@ -185,21 +386,75 @@
                             <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
                         </td>
                         <td>
-                            <a>Label: {{ imagedata[1] }}</a>
+                            <a>Label: {{ imagedata[2] }}</a>
                             <br><br>
-                            <a>Confidence: {{ imagedata[2] }}</a>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [(value * 100) + '%'],
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
                         </td>
                     </tr>
                     {% endfor %}
-                </table> 
+                </table>
             </div>
-          </div>
+        </div>
     </section>
+    
+    <!-- Include the Plotly script outside the loop -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
 
     <section id="section">
         <div class="grid-container-2">
             <div class="headline">
-                <a>incorrect-classified-images</a>
+                <a>your incorrect classified images</a>
             </div>
             <div class="incorrect-resultside">
                 <table name="incorrect_imagedata" method="GET">
@@ -209,13 +464,63 @@
                             <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
                         </td>
                         <td>
-                            <a>Label: {{ imagedata[1] }}</a>
+                            <a>Label: {{ imagedata[2] }}</a>
                             <br><br>
-                            <a>Confidence: {{ imagedata[2] }}</a>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="plotly-graph2-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('plotly-graph2-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [(value * 100) + '%'],
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
                         </td>
                     </tr>
                     {% endfor %}
-                </table>                
+                </table>                 
             </div>
           </div>
     </section>

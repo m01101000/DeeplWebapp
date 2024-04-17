@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify
 import os
 from werkzeug.utils import secure_filename
 import sqlite3
 import shutil
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 app.secret_key = 'abcdefg'
@@ -131,6 +132,26 @@ def ea1():
             if 'path' not in session:
                 path = ""
 
+            sysdata = 'static/sysdata/ea1_exampleimages.db'
+            # Verbindung zur Datenbank herstellen
+            connection = sqlite3.connect(sysdata)
+            cursor = connection.cursor()
+
+            # Daten abrufen
+            cursor.execute('SELECT * FROM imagedata WHERE evaluation = "correct"')
+            saved_correct = cursor.fetchall()
+
+            # Daten abrufen
+            cursor.execute('SELECT * FROM imagedata WHERE evaluation = "incorrect"')
+            saved_incorrect = cursor.fetchall()
+
+            # Änderungen speichern
+            connection.commit()
+
+            # Verbindung schließen
+            cursor.close()
+            connection.close()
+
             # Define the path to the database file
             db_path = 'static/userfiles/EA1/' + username + '/imagedata/' + (username + '_imagedata.db')
             saved_correct_Images = ''
@@ -157,7 +178,10 @@ def ea1():
             else:
                 print("No images saved.")
 
-            return render_template('EA1.html', username=username, user_file_name=user_file_name, path=path, saved_correct_Images=saved_correct_Images, saved_incorrect_Images=saved_incorrect_Images)
+            # Standardwert für den Balken (0.19 entspricht 19%)
+            default_value = 0
+
+            return render_template('EA1.html', saved_correct=saved_correct, saved_incorrect= saved_incorrect, defaultValue=default_value, username=username, user_file_name=user_file_name, path=path, saved_correct_Images=saved_correct_Images, saved_incorrect_Images=saved_incorrect_Images)
 
     return redirect(url_for('login'))
 
@@ -330,4 +354,4 @@ def imprint():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(port=2000, debug=True)
+    app.run()

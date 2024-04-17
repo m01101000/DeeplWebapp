@@ -53,6 +53,13 @@
         border-radius: 1rem;
         margin: 1rem;
       }
+      .imageside .imageupload_display .dragDropArea{
+        background-color: #BADFE7;
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        border-radius: 1rem;
+      }
       .imageside .imageupload_display img {
         width: 100%;
       }
@@ -116,6 +123,9 @@
       .correct-resultside .images {
         width: 30%;
       }
+      .correct-resultside .plotly-graph{
+        visibility: hidden;
+      }
       .correct-resultside img {
         width: 100px;
         margin-left: 1rem;
@@ -131,6 +141,9 @@
       }
       .incorrect-resultside .images {
         width: 30%;
+      }
+      .incorrect-resultside .plotly-graph{
+        visibility: hidden;
       }
       .incorrect-resultside img {
         width: 100px;
@@ -208,6 +221,13 @@
         margin: 1rem;
         height: 90%;
       }
+      .imageside .imageupload_display .dragDropArea{
+        background-color: #BADFE7;
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        border-radius: 1rem;
+      }
       .imageside .imageupload_display img {
         width: 400px;
       }
@@ -284,11 +304,11 @@
         margin: 1rem;
       }
       .incorrect-resultside .images {
-        width: 30%;
+        width: 40%;
       }
       .incorrect-resultside img {
         width: 200px;
-        margin-left: 1rem;
+        margin-left: 0rem;
         margin-bottom: 1rem;
         margin-right: 1rem;
       }
