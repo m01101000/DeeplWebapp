@@ -1,9 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify, send_file, make_response
 import os
 from werkzeug.utils import secure_filename
 import sqlite3
 import shutil
 import plotly.graph_objs as go
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, PageBreak, Image, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
 app.secret_key = 'abcdefg'
@@ -38,7 +42,8 @@ def login():
         else:
             # Authentifizierung fehlgeschlagen
             error = True
-    return render_template('login.html', error=error)
+    return render_template('login.html',
+                           error=error)
 
 ##############################################################
 
@@ -97,7 +102,11 @@ def dashboard():
             else:
                 print("No images saved.")
 
-            return render_template('dashboard.html', username=username, analyzedimages=analyzedimages, averageconfidence=averageconfidence)
+            return render_template('dashboard.html',
+                                   username=username,
+                                   analyzedimages=analyzedimages,
+                                   averageconfidence=averageconfidence)
+
     return redirect(url_for('login'))
 
 ##############################################################
@@ -114,7 +123,8 @@ def tutorials():
 
 @app.route('/tutorials/<path:filename>')
 def serve_video(filename):
-    return send_from_directory('static/tutorials', filename)
+    return send_from_directory('static/tutorials',
+                               filename)
 
 ##############################################################
 
@@ -181,7 +191,19 @@ def ea1():
             # Standardwert für den Balken (0.19 entspricht 19%)
             default_value = 0
 
-            return render_template('EA1.html', saved_correct=saved_correct, saved_incorrect= saved_incorrect, defaultValue=default_value, username=username, user_file_name=user_file_name, path=path, saved_correct_Images=saved_correct_Images, saved_incorrect_Images=saved_incorrect_Images)
+            # to display results and documentation
+            evaluator = "evaluator" if username == "Mustermann" else "placeholder"
+
+            return render_template('EA1.html',
+                                   evaluator=evaluator,
+                                   saved_correct=saved_correct,
+                                   saved_incorrect= saved_incorrect,
+                                   defaultValue=default_value,
+                                   username=username,
+                                   user_file_name=user_file_name,
+                                   path=path,
+                                   saved_correct_Images=saved_correct_Images,
+                                   saved_incorrect_Images=saved_incorrect_Images)
 
     return redirect(url_for('login'))
 
@@ -340,6 +362,128 @@ def ea1discard():
             return redirect(url_for('ea1'))
         else:
             return redirect(url_for('login'))
+        
+@app.route('/EA1report', methods=['GET', 'POST'])
+def ea1report():
+    if 'username' in session and 'password' in session:
+        username = session['username']
+        password = session['password']
+        user = authenticate(username, password)
+        if user:
+            def create_pdf(file_name):
+                doc = SimpleDocTemplate(file_name, pagesize=letter)
+                styles = getSampleStyleSheet()
+
+                # Inhalte für die PDF
+                flowables = []
+
+                # Füge Titel hinzu
+                title = Paragraph(('Report EA1 - User: ' + username), styles['Title'])
+                flowables.append(title)
+
+                # Füge eine Spacer-Komponente ein
+                spacer = Spacer(1, 20)
+                flowables.append(spacer)
+
+                # Füge Absatz nach dem Seitenumbruch hinzu
+                text = "Dies ist ein Beispieltext."
+                paragraph = Paragraph(text, styles['Normal'])
+                flowables.append(paragraph)
+                
+                sysdata = 'static/sysdata/ea1_exampleimages.db'
+                # Verbindung zur Datenbank herstellen
+                connection = sqlite3.connect(sysdata)
+                cursor = connection.cursor()
+
+                # Füge eine Spacer-Komponente ein
+                spacer = Spacer(1, 20)
+                flowables.append(spacer)
+
+                # Füge Absatz nach dem Seitenumbruch hinzu
+                text = "YOUR CORRECT CLASSIFIED IMAGES"
+                paragraph = Paragraph(text, styles['Normal'])
+                flowables.append(paragraph)
+
+                # Daten abrufen
+                cursor.execute('SELECT * FROM imagedata WHERE evaluation = "correct"')
+                saved_correct = cursor.fetchall()
+
+                table_data1 = []
+
+                for row1 in saved_correct:
+                    table_row1 = []
+                    for cell in row1:
+                        if isinstance(cell, str) and (cell.endswith('.jpg') or cell.endswith('.png')):
+                            # Wenn die Zelle eine Bild-URL ist, füge das Bild ein
+                            img = Image("static/" + cell)
+                            img.drawHeight = 50  # Größe des Bildes anpassen
+                            img.drawWidth = 50
+                            table_row1.append(img)
+                        else:
+                            table_row1.append(str(cell))
+                    table_data1.append(table_row1)
+                table1 = Table(table_data1)
+                flowables.append(table1)
+
+                # Füge eine Spacer-Komponente ein
+                spacer = Spacer(1, 20)
+                flowables.append(spacer)
+
+                # Füge Absatz nach dem Seitenumbruch hinzu
+                text = "YOUR INCORRECT CLASSIFIED IMAGES"
+                paragraph = Paragraph(text, styles['Normal'])
+                flowables.append(paragraph)
+
+                # Daten abrufen
+                cursor.execute('SELECT * FROM imagedata WHERE evaluation = "incorrect"')
+                saved_incorrect = cursor.fetchall()
+
+                table_data2 = []
+
+                for row2 in saved_incorrect:
+                    table_row2 = []
+                    for cell in row2:
+                        if isinstance(cell, str) and (cell.endswith('.jpg') or cell.endswith('.png')):
+                            # Wenn die Zelle eine Bild-URL ist, füge das Bild ein
+                            img = Image("static/" + cell)
+                            img.drawHeight = 50  # Größe des Bildes anpassen
+                            img.drawWidth = 50
+                            table_row2.append(img)
+                        else:
+                            table_row2.append(str(cell))
+                    table_data2.append(table_row2)
+                table2 = Table(table_data2)
+                flowables.append(table2)
+
+                # Änderungen speichern
+                connection.commit()
+                # Verbindung schließen
+                cursor.close()
+                connection.close()
+
+                # Erzeuge PDF
+                doc.build(flowables)
+
+            # Überprüfen, ob der Ordner mit dem Benutzernamen existiert
+            path = 'static/userfiles/EA1/' + username
+            if not os.path.exists(path):
+                    # Wenn der Ordner nicht existiert, erstelle ihn
+                os.makedirs(path)
+
+            # Erstelle die PDF-Datei
+            create_pdf(f"{path}/{username}_EA1_report.pdf")
+
+            pdf_path = f"{path}/{username}_EA1_report.pdf"
+
+            if os.path.exists(pdf_path):
+                response = make_response(send_file(pdf_path, as_attachment=True))
+                response.headers["Content-Disposition"] = f"attachment; filename={username}_EA1_report.pdf"
+                response.headers["Content-Type"] = "application/pdf"
+                return response
+            else:
+                return redirect(url_for('ea1'))
+        else:
+            return redirect(url_for('login'))
 
 ##############################################################
 
@@ -354,4 +498,4 @@ def imprint():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000, debug=False, threaded=True)

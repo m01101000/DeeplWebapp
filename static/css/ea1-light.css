@@ -33,6 +33,24 @@
         margin: 1rem;
       }
       
+      .grid-container-evaluator {
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        gap: 10px;
+        border: solid;
+        border-color: #C2EDCE;
+        border-radius: 1rem;
+        color: #388087;
+      }
+
+      .grid-container-evaluator > div {
+        padding: 20px 0;
+      }
+  
+      .grid-container-evaluator > div > a {
+        margin: 1rem;
+      }
+
       .headline {
         grid-column: 1 / 5;
         font-size: large;
@@ -53,10 +71,9 @@
         border-radius: 1rem;
         margin: 1rem;
       }
-      .imageside .imageupload_display .dragDropArea{
+      .imageside .imageupload_display .dragarea {
         background-color: #BADFE7;
-        border: 2px dashed #ccc;
-        padding: 20px;
+        height: auto;
         text-align: center;
         border-radius: 1rem;
       }
@@ -201,6 +218,25 @@
         margin: 1rem;
       }
 
+      .grid-container-evaluator {
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        gap: 10px;
+        border-radius: 1rem;
+        border: solid;
+        border-color: #C2EDCE;
+        color: rgb(56, 128, 135);
+      }
+      
+      .grid-container-evaluator > div {
+        padding: 20px 0;
+      }
+  
+      .grid-container-evaluator > div > a {
+        margin: 1rem;
+        color: rgb(56, 128, 135);
+      }
+
       .headline {
         grid-column: 1 / 5;
         font-size: xx-large;
@@ -221,10 +257,9 @@
         margin: 1rem;
         height: 90%;
       }
-      .imageside .imageupload_display .dragDropArea{
+      .imageside .imageupload_display .dragarea {
         background-color: #BADFE7;
-        border: 2px dashed #ccc;
-        padding: 20px;
+        height: auto;
         text-align: center;
         border-radius: 1rem;
       }
@@ -301,14 +336,13 @@
         grid-column: 1 / 5;
         text-align: left;
         color: #388087;
-        margin: 1rem;
       }
       .incorrect-resultside .images {
         width: 40%;
       }
       .incorrect-resultside img {
         width: 200px;
-        margin-left: 0rem;
+        margin-left: 1rem;
         margin-bottom: 1rem;
         margin-right: 1rem;
       }

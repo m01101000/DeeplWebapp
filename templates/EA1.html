@@ -63,32 +63,60 @@
             </div>
             <div class="imageside">
                 <div class="imageupload_display" style="text-align: center;">
-                    <div class="dragDropArea" id="dragDropArea">
-                        <p>Upload or Drag & Drop your image here (400x400px)</p>
+                    <div>
                         <form id="imageUploadForm" action="/EA1upload" method="POST" enctype="multipart/form-data">
-                            <input type="file" id="imageInput" name="image" accept="image/*" class="custom-file-input">
+                            <input type="file" id="imageInput" name="image" accept="image/*" class="custom-file-input" style="display: none;">
+                            <label for="imageInput" id="fileInputLabel">
+                                <div class="dragarea">
+                                    <br>
+                                    <p>Click to Upload or Drag & Drop here (400x400px)</p>
+                                    <br>
+                                </div>
+                            </label>
                             <input type="hidden" name="uploadBy" value="{{ username }}">
                         </form>
                     </div>
+                    {% if user_file_name %}
+                        <img id="loadedImage" src="{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}" style="margin-bottom: 1rem;">
+                    {% endif %}
+                    <div id="img" style="display: none;"></div>
                     <script>
-                        var dragDropArea = document.getElementById('dragDropArea');
-                        var imageInput = document.getElementById('imageInput');
-                        var imagePreview = document.getElementById('imagePreview');
-                    
-                        dragDropArea.addEventListener('dragover', function(event) {
-                            event.preventDefault();
+                        const imageInput = document.getElementById('imageInput');
+                        const fileInputLabel = document.getElementById('fileInputLabel');
+
+                        // Dragover event listener to allow dropping
+                        fileInputLabel.addEventListener('dragover', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#f1f1f1';
                         });
-                    
-                        dragDropArea.addEventListener('dragleave', function(event) {
-                            event.preventDefault();
+
+                        // Dragleave event listener to reset background
+                        fileInputLabel.addEventListener('dragleave', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#ffffff';
                         });
-                    
-                        dragDropArea.addEventListener('drop', function(event) {
-                            event.preventDefault();
-                    
-                            var files = event.dataTransfer.files;
+
+                        // Drop event listener to handle dropped files
+                        fileInputLabel.addEventListener('drop', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#ffffff';
+                            
+                            const files = e.dataTransfer.files;
                             imageInput.files = files;
+
+                            // Manually trigger form submission after updating the file input
+                            document.getElementById('imageUploadForm').submit();
+                        });
                     
+                        imageInput.addEventListener('change', function(event) {
+                            var files = event.target.files;
+                            handleFiles(files);
+                        });
+                    
+                        function handleFiles(files) {
                             var file = files[0]; // Assuming only one file is selected
                             if (file) {
                                 var reader = new FileReader();
@@ -97,6 +125,7 @@
                                     img.onload = function() {
                                         if (img.width === 400 && img.height === 400) {
                                             uploadImage(file);
+                                            loadedImage.src = e.target.result; // Update the image here
                                         } else {
                                             alert("Please upload an image with dimensions exactly 400x400 pixels.");
                                         }
@@ -105,7 +134,7 @@
                                 };
                                 reader.readAsDataURL(file);
                             }
-                        });
+                        }
                     
                         function uploadImage(file) {
                             var form = document.getElementById('imageUploadForm');
@@ -126,15 +155,11 @@
                             xhr.send(formData);
                         }
                     </script>
-                    {% if user_file_name %}
-                        <img id="loadedImage" src="{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}" style="margin-bottom: 1rem;"/>
-                    {% endif %}
-                    <div id="img" style="display: none;"></div>
                 </div>
             </div>
             <div class="resultside">
                 <div class="classify">
-                    1. upload your picture 
+                    1. upload your image 
                 </div>
                 <form action="/EA1storage" method="POST" enctype="multipart/form-data">
                     <div class="results">
@@ -522,16 +547,112 @@
                     {% endfor %}
                 </table>                 
             </div>
-          </div>
+        </div>
     </section>
+
+    {% if evaluator == "evaluator" %}
+    <section>
+        <div class="grid-container-evaluator">
+            <a style="margin-left: 1rem;">This content will only be shown to selected users</a>
+            <div class="headline">
+                <a>Results</a>
+            </div>
+            <div>
+                <div style="margin-left: 1rem;">
+                    <a style="text-decoration: underline;">placeholder:</a><br><br>
+                    <a>placeholder:</a><br>
+                        <a>placeholder</a><br><br>
+                    <a>placeholder:</a><br>
+                        <a>placeholder</a><br>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div class="grid-container-evaluator">
+            <a style="margin-left: 1rem;">This content will only be shown to selected users</a>
+            <div class="headline">
+                <a>Documentation</a>
+            </div>
+            <div>
+                <div style="margin-left: 1rem;">
+                    <a style="text-decoration: underline;">Frameworks:</a><br><br>
+                    <a>Flask==3.0.3</a><br>
+                        <a>Flask is a micro web framework written in Python. It is lightweight and provides tools and libraries to help build web applications.<a href="https://flask.palletsprojects.com/en/3.0.x/">Flask Documentation</a></a><br><br>
+                    <a>Jinja2==3.1.3</a><br>
+                        <a>Jinja2 is a modern and designer-friendly templating language for Python, used for creating HTML, XML, or other markup formats.<a href="https://jinja.palletsprojects.com/en/3.1.x/">Jinja Documentation</a></a><br>
+                    <br>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <a style="text-decoration: underline;">Libraries:</a><br><br>
+                    <a>blinker==1.7.0</a><br>
+                        <a>Blinker provides fast and simple object-to-object and broadcast signaling for Python objects. It is used for event signaling within a Python application.</a><br><br>
+                    <a>chardet==5.2.0</a><br>
+                        <a>Chardet is a universal character encoding detector for Python. It can automatically detect a wide range of character encodings.</a><br><br>
+                    <a>click==8.1.7</a><br>
+                        <a>Click is a Python package for creating command-line interfaces. It makes it easy to write simple scripts and complex command-line applications.</a><br><br>
+                    <a>colorama==0.4.6</a><br>
+                        <a>Colorama is a Python package that makes it easy to work with colors in the terminal. It provides simple cross-platform support for colored terminal text.</a><br><br>
+                    <a>importlib_metadata==7.1.0</a><br>
+                        <a>Importlib_metadata provides tools for working with Python distributions. It can extract metadata from Python packages and modules.</a><br><br>
+                    <a>itsdangerous==2.1.2</a><br>
+                        <a>Itsdangerous is a Python library for generating and parsing cryptographically secure tokens. It is commonly used for securely signing data.</a><br><br>
+                    <a>MarkupSafe==2.1.5</a><br>
+                        <a>MarkupSafe is a library used by Jinja2 to provide Unicode, string, and byte support. It helps ensure secure string handling in templates.</a><br><br>
+                    <a>packaging==24.0</a><br>
+                        <a>Packaging is a Python library that provides core utilities for Python package management and distribution. It is used for working with Python packages and metadata.</a><br><br>
+                    <a>pillow==10.3.0</a><br>
+                        <a>Pillow is a Python Imaging Library (PIL), which adds image processing capabilities to your Python interpreter. It is used for opening, manipulating, and saving many different image file formats.</a><br><br>
+                    <a>plotly==5.20.0</a><br>
+                        <a>Plotly is a Python graphing library that makes interactive, publication-quality graphs online. It is used for creating and sharing interactive, web-based graphs.</a><br><br>
+                    <a>reportlab==4.1.0</a><br>
+                        <a>ReportLab is a Python library that helps to create PDF documents using the Python programming language. It is widely used for generating dynamic PDFs.</a><br><br>
+                    <a>tenacity==8.2.3</a><br>
+                        <a>Tenacity is a general-purpose retrying library to simplify the task of adding retry behavior to Python code. It is commonly used to retry operations that may fail intermittently.</a><br><br>
+                    <a>Werkzeug==3.0.2</a><br>
+                        <a>Werkzeug is a comprehensive WSGI (Web Server Gateway Interface) web application library. It is widely used as a foundation for many Python web frameworks and applications.</a><br><br>
+                    <a>zipp==3.18.1</a><br>
+                        <a>Zipp is a simple, fast, and safe Python package that provides a way to enumerate directories within a zip archive. It is used for accessing data inside zip archives without needing to extract them.</a><br>
+                    <br>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <a style="text-decoration: underline;">Technical specific of this approach:</a><br><br>
+                    <a>Interaction:</a><br>
+                        <a>placeholder</a><br><br>
+                            <a style="margin-left: 2rem;">
+                                code:
+                            </a><br><br>
+                        <a>placeholder</a><br><br>
+                    <a>placeholder:</a><br>
+                        <a>placeholder</a><br>
+                    <br>
+                </div>
+                <div style="margin-left: 1rem;">
+                    <a style="text-decoration: underline;">Sources:</a><br><br>
+                    <a>placeholder:</a><br>
+                        <a>placeholder</a><br><br>
+                    <a>placeholder:</a><br>
+                        <a>placeholder</a><br>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <section id="section">
         <div class="grid-container">
-            <div class="ea1-report">
+            <div class="ea1-report" id="clickableDiv" style="cursor: pointer;">
                 EA1 Download report
                 <br>
                 <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
             </div>
+            <script>
+                document.getElementById("clickableDiv").addEventListener("click", function() {
+                    window.location.href = "{{ url_for('ea1report') }}";
+                });
+            </script>
           </div>
     </section>
     

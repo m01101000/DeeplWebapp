@@ -65,11 +65,16 @@
                 <br><br>
                 <a style="font-size: xx-large;">{{ averageconfidence }}</a><a>average confidence</a>
             </div>
-            <div class="report1">
+            <div class="report1" id="clickableDiv" style="cursor: pointer;">
                 <a>Download report</a>
                 <br><br>
                 <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
             </div>
+            <script>
+                document.getElementById("clickableDiv").addEventListener("click", function() {
+                    window.location.href = "{{ url_for('ea1report') }}";
+                });
+            </script>
           </div>
     </section>
 
