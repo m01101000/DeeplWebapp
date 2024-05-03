@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link id="theme-css" rel="stylesheet" href="{{ url_for('static', filename='css/login.css')}}">
+    <script src="{{ url_for('static', filename='script/login.js') }}"></script>
+</head>
+<body>
+    <form method="post" action="/">
+        <h2>Login</h2>
+        {% if error %}
+            <p class="error-message">Invalid credentials. Please try again.</p>
+        {% endif %}
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"><br><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br><br>
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>

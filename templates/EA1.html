@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EA 1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ea1.css')}}" id="ea1-css">
+    <script src="{{ url_for('static', filename='script/ea1.js') }}"></script>
+    <!--p5-->
+    <script src="{{ url_for('static', filename='script/p5.min.js') }}"></script>
+    <!--ml5-->
+    <script src="https://unpkg.com/ml5@0.6.1/dist/ml5.min.js" type="text/javascript"></script>
+</head>
+<body>
+    <!-- Your body content -->
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>EA 1</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='dashboard'>Dashboard</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='tutorials'>Tutorials</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a class='selectedmenu' href='dashboard'>Dashboard</a>
+        </div>
+        <div>
+            <a class='selectedmenu' href='tutorials'>Tutorials</a>
+            <a>EA 1</a>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <br>
+    
+    <!-- Your body content -->
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline">
+                <a>EA 1: Image classification with ml5</a>
+            </div>
+            <div class="imageside">
+                <div class="imageupload_display" style="text-align: center;">
+                    <div>
+                        <form id="imageUploadForm" action="/EA1upload" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageInput" name="image" accept="image/*" class="custom-file-input" style="display: none;">
+                            <label for="imageInput" id="fileInputLabel">
+                                <div class="dragarea">
+                                    <br>
+                                    <p>Click to Upload or Drag & Drop here (400x400px)</p>
+                                    <br>
+                                </div>
+                            </label>
+                            <input type="hidden" name="uploadBy" value="{{ username }}">
+                        </form>
+                    </div>
+                    {% if user_file_name %}
+                        <img id="loadedImage" src="{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}" style="margin-bottom: 1rem;">
+                    {% endif %}
+                    <div id="img" style="display: none;"></div>
+                    <div id="wrong_size" style="display: none; color: red; background-color: #fff; border: solid; border-color: red;">Please upload an image with dimensions exactly 400x400 pixels.</div>
+                    <script>
+                        const imageInput = document.getElementById('imageInput');
+                        const fileInputLabel = document.getElementById('fileInputLabel');
+                        const wrongSizeMessage = document.getElementById('wrong_size');
+            
+                        // Dragover event listener to allow dropping
+                        fileInputLabel.addEventListener('dragover', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#f1f1f1';
+                        });
+            
+                        // Dragleave event listener to reset background
+                        fileInputLabel.addEventListener('dragleave', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#ffffff';
+                        });
+            
+                        // Drop event listener to handle dropped files
+                        fileInputLabel.addEventListener('drop', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            fileInputLabel.style.background = '#ffffff';
+                            
+                            const files = e.dataTransfer.files;
+                            imageInput.files = files;
+            
+                            // Check image size on drop
+                            handleFiles(files);
+                        });
+            
+                        // Change event listener for file input
+                        imageInput.addEventListener('change', function(event) {
+                            const files = event.target.files;
+                            handleFiles(files);
+                        });
+            
+                        // Function to handle file validation
+                        function handleFiles(files) {
+                            const file = files[0]; // Assuming only one file is selected
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    const img = new Image();
+                                    img.onload = function() {
+                                        if (img.width === 400 && img.height === 400) {
+                                            uploadImage(file);
+                                            loadedImage.src = e.target.result; // Update the image here
+                                        } else {
+                                            wrongSizeMessage.style.display = 'block';
+                                        }
+                                    };
+                                    img.src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }
+            
+                        // Function to upload image
+                        function uploadImage(file) {
+                            const form = document.getElementById('imageUploadForm');
+                            const formData = new FormData(form);
+                            formData.append('image', file);
+            
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('POST', form.action, true);
+                            xhr.onload = function() {
+                                // Handle upload success
+                                console.log('Upload successful');
+                                location.reload(); // Reload the page after successful upload
+                            };
+                            xhr.onerror = function() {
+                                // Handle upload error
+                                console.error('Upload failed');
+                            };
+                            xhr.send(formData);
+                        }
+                    </script>
+                </div>
+            </div>
+            
+            <div class="resultside">
+                <div class="classify">
+                    1. upload your image 
+                </div>
+                <form action="/EA1storage" method="POST" enctype="multipart/form-data">
+                    <div class="results">
+                        <a style="text-decoration: underline;">results take a few seconds</a>
+                        <br>
+
+                        <input type="hidden" id="label_input" name="SAVE_label">
+                        <input type="hidden" id="confidence_input" name="SAVE_confidence">
+
+                        <div id="classification_result" style="margin: 1rem;"></div>
+                        
+                        <script>
+                            let classifier;
+                            let img;
+                                            
+                            function preload() {
+                                classifier = ml5.imageClassifier('MobileNet');
+                                img = loadImage("{{ url_for('static', filename='uploads/'+ username + '/' + user_file_name) }}");
+                            }
+                                        
+                            function setup() {
+                                createCanvas(400, 400);
+                                classifier.classify(img, gotResult);
+                                let imgElement = createImg(img.src); // Create img element
+                                imgElement.parent('img'); // Append img element to 'img' div
+                            }
+                                            
+                            function gotResult(error, results) {
+                                if (error) {
+                                    console.error(error);
+                                }
+                                console.log(results);
+                                let label = results[0].label;
+                                let confidence = nf(results[0].confidence, 0, 2);
+
+                                // Check if the label is "window screen"
+                                if (label.toLowerCase() === "window screen") {
+                                    label = ""; // Set label to empty string
+                                    confidence = ""; // Set confidence to empty string
+                                }
+
+                                // Set the label and confidence in hidden input fields
+                                document.getElementById('label_input').value = label;
+                                document.getElementById('confidence_input').value = confidence;
+
+                                let resultDiv = createDiv(`Label: ${label}<br><br>`); // Create div for label
+                                resultDiv.parent('classification_result'); // Append div to 'results' div
+                                let confidenceDiv = createDiv(`Confidence: ${confidence}`); // Create div for confidence
+                                confidenceDiv.parent('classification_result'); // Append div to 'results' div
+                            }
+                        </script>
+                    </div>
+                    <div class="evaluate">
+                        2. classified correctly?
+                        <br><br>
+                        <button type="button" style="color: red;" onclick="setEvaluation('incorrect')">incorrect</button>
+                        <button type="button" style="color: green;" onclick="setEvaluation('correct')">correct</button>
+                        <input type="hidden" id="evaluationInput" name="evaluation" value="">
+                        
+                        <script>
+                            function setEvaluation(value) {
+                                document.getElementById('evaluationInput').value = value;
+                                const buttons = document.querySelectorAll('.evaluate button');
+                                buttons.forEach(button => {
+                                    button.style.color = 'black'; // Reset color of all buttons
+                                });
+                                const selectedButton = document.querySelector(`.evaluate button[onclick="setEvaluation('${value}')"`);
+                                selectedButton.style.color = value === 'correct' ? 'green' : 'red'; // Highlight selected button
+                            }
+                        
+                            document.getElementById('evaluationForm').addEventListener('submit', function (event) {
+                                const evaluationValue = document.getElementById('evaluationInput').value;
+                                if (!evaluationValue) {
+                                    event.preventDefault(); // Prevent form submission if no evaluation is selected
+                                    alert('Please select an evaluation (correct/incorrect)');
+                                }
+                            });
+                        </script>
+                    </div>
+                    <div class="save">
+                        3. save image?
+                        <br><br>
+                        <!--<button type="button" style="color: red;">discard</button>--> 
+                        <button type="submit" style="color: green;">save</button> 
+                    </div>
+                </form>
+                <form action="/EA1discard" method="POST" enctype="multipart/form-data">
+                    <div class="discard">
+                        <button type="submit" style="color: red;">discard</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="headline" style="color: rgb(0, 128, 0, 0.5);">
+                <a>example - correct classified images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_correct %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="0plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('0plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    //
+                                    var formattedValue = (value * 100).toFixed(2).split('.')[0]; // Keep two decimal places and split at the decimal point
+                                    var percentageText = formattedValue + '%';
+                                    //
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [percentageText],
+                                        textposition: 'inside',
+                                        textfont: { color: 'white' },
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="headline" style="color: rgb(255, 0, 0, 0.5);">
+                <a>example - incorrect classified images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_incorrect %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="1plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('1plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    //
+                                    var formattedValue = (value * 100).toFixed(2).split('.')[0]; // Keep two decimal places and split at the decimal point
+                                    var percentageText = formattedValue + '%';
+                                    //
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [percentageText],
+                                        textposition: 'inside',
+                                        textfont: { color: 'white' },
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+    
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="headline">
+                <a>your correct classified images</a>
+            </div>
+            <div class="correct-resultside">
+                <table name="correct_imagedata" method="GET">
+                    {% for imagedata in saved_correct_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="plotly-graph-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('plotly-graph-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    //
+                                    var formattedValue = (value * 100).toFixed(2).split('.')[0]; // Keep two decimal places and split at the decimal point
+                                    var percentageText = formattedValue + '%';
+                                    //
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [percentageText],
+                                        textposition: 'inside',
+                                        textfont: { color: 'white' },
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Include the Plotly script outside the loop -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+
+    <section id="section">
+        <div class="grid-container-2">
+            <div class="headline">
+                <a>your incorrect classified images</a>
+            </div>
+            <div class="incorrect-resultside">
+                <table name="incorrect_imagedata" method="GET">
+                    {% for imagedata in saved_incorrect_Images %}
+                    <tr>
+                        <td class="images">
+                            <img src="{{ url_for('static', filename=imagedata[4]) }}" alt="Image">
+                        </td>
+                        <td>
+                            <a>Label: {{ imagedata[2] }}</a>
+                            <br><br>
+                            <a>Confidence: {{ imagedata[1] }}</a>
+                            <br><br>
+                            <!-- Use data-value to store the confidence value -->
+                            <div class="plotly-graph" id="plotly-graph2-{{ loop.index }}" data-value="{{ imagedata[1] }}"></div>
+                            <!-- Include the Plotly script for this specific plot -->
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    // Get the value from the data-value attribute of this specific plot
+                                    var plotlyGraph = document.getElementById('plotly-graph2-{{ loop.index }}');
+                                    var value = plotlyGraph.getAttribute('data-value');
+                                    //
+                                    var formattedValue = (value * 100).toFixed(2).split('.')[0]; // Keep two decimal places and split at the decimal point
+                                    var percentageText = formattedValue + '%';
+                                    //
+                                    console.log(value);
+                                    
+                                    // Create trace, layout, and data for Plotly plot
+                                    var trace = {
+                                        x: [value],
+                                        y: ['Image'],
+                                        type: 'bar',
+                                        orientation: 'h',
+                                        text: [percentageText],
+                                        textposition: 'inside',
+                                        textfont: { color: 'white' },
+                                        marker: { 
+                                            color: 'rgba(0, 0, 0, 0.5)',
+                                            size: 20,
+                                            line: {
+                                                width: 2 // Hier wird die Breite des Rands um die Balken festgelegt
+                                            }
+                                        }
+                                    };
+                                    
+                                    var layout = {
+                                        xaxis: { title: 'Confidence', range: [0, 1], dtick: 0.1 },
+                                        showlegend: false,
+                                        showgrid: true,
+                                        plot_bgcolor: 'rgba(0, 0, 0, 0.1)',
+                                        paper_bgcolor: 'rgb(0, 0, 0, 0)',
+                                        margin: {
+                                            l: 80, // Linker Rand
+                                            r: 80, // Rechter Rand
+                                            b: 50, // Unterer Rand
+                                            t: 0, // Oberer Rand
+                                            pad: 0 // Innenabstand zwischen Plot-Bereich und Außenrahmen
+                                        },
+                                        width: 500,
+                                        height: 100
+                                    };
+
+                                    var data = [trace];
+                                    
+                                    // Generate the plot for this specific plotly graph
+                                    Plotly.newPlot(plotlyGraph, data, layout);
+                                });
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>                 
+            </div>
+        </div>
+    </section>
+
+    {% if evaluator == "evaluator" %}
+    <section>
+        <a style="margin-left: 1rem;">This content will only be shown to selected users</a>
+        <div class="grid-container-evaluator">
+            <div class="headline">
+                <a>Results</a>
+            </div>
+            <br>
+            <div class="documentation">
+                <a>In deep learning, particularly in image classification tasks, neural networks are trained to recognize patterns and features within images.</a>
+                <a>These networks learn from large datasets, adjusting their internal parameters (weights and biases) during a process called training.</a>
+                <a>The goal is for the network to learn representations of the input data that allow it to make accurate predictions about new, unseen data.</a>
+                <br><br>
+                <a>In this case the results show that the classification strongly depends on the perspective and context of the respective image.</a>
+                <a>This becomes clear when looking at the third correctly classified image and the third incorrectly classified image.</a>
+                <a>The third correctly classified image shows a boat moving on water, the confidence is given as 94%.</a>
+                <a>If you look at the individual features such as colors and shapes, you will notice that there is not much to see in this picture other than the boat.</a>
+                <a>Only the dark blue water and the white spray of the boat can be seen.</a>
+                <a>If you look at the misclassified image of the boat, which was classified as a missile with a 33% confidence, you can see that there are very different colors and shapes in addition to the boat.</a>
+                <a>The picture shows black wheels of a turquoise vehicle. This vehicle is standing on a gray area and is loaded with the boat.</a>
+                <a>This completely different representation makes pattern recognition and thus also neural assignment more difficult.</a>
+                <br><br>
+                <a>In the context of the described scenario, let's assume the neural network has been trained on a diverse dataset that includes images of both boats and missiles, as well as other objects.</a>
+                <a>During training, the network learns to associate certain features and patterns with each class.</a>
+                <a>For example, it might learn that boats often appear surrounded by blue pixels (representing water), have elongated shapes, and exhibit certain textures like white spray.</a>
+                <a>Similarly, it might learn that missiles tend to have cylindrical shapes.</a>
+                <br><br>
+                <a>Another example is the first misclassified image of a smartwatch.</a>
+                <a>The picture shows a completely white background and the clock shown only has the three hands for hours, minutes and seconds as the only traditional features of a clock.</a>
+                <a>It is also difficult to determine the shape of the case and band because they are the same color.</a>
+                <a>In my opinion, the neural network may not recognize the smartwatch because there are no contextual features beyond the three traditional watch hands.</a>
+                <br><br>
+                <a>In essence, the differences in classification between these images highlight the importance of context and perspective in image classification tasks.</a>
+                <a>The neural network's ability to correctly classify an image depends heavily on the similarity between the features it has learned during training and the features present in the input image.</a>
+                <a>When the input image deviates significantly from the learned features or context, as in the case of the misclassified boat, the network may struggle to make accurate predictions.</a>
+            </div>
+            <br>
+        </div>
+    </section>
+    <section>
+        <a class="info" style="margin-left: 1rem;">This content will only be shown to selected users</a>
+        <div class="grid-container-evaluator">
+            <div class="headline">
+                <a>Documentation</a>
+            </div>
+            <br>
+            <div class="documentation">
+                <a>Technical approach:</a><br>
+                <br>
+                <a class="minitopic" style="text-decoration: underline;">Light/Dark Mode Implementation:</a><br>
+                <br>
+                <a><img src="{{ url_for('static', filename='images/mode_exp.PNG') }}"/></a><br>
+                <br>
+                <a>This code detects the user's preferred color scheme using window.matchMedia, specifically checking if the user prefers a dark color scheme.</a>
+                <a>Based on the result, it sets the colorScheme variable to either 'dark' or 'light'.</a>
+                <a>Then, it dynamically updates the href attribute of the <link> tags with IDs site-css and ea1-css to load the appropriate CSS files based on the detected color scheme.</a><br>
+                <br>
+            </div>
+            <br>
+            <div class="documentation">
+                <a class="minitopic" style="text-decoration: underline;">Deviation from task (no classify button):</a><br>
+                <br>
+                <a>When creating the form structure, I incorporated a deviation from the task.</a>
+                <a>There is no classify button.</a>
+                <a>Images are automatically classified after uploading.</a><br>
+                <br>
+                <a>For classification, this web application first checks whether the size of the uploaded file is correct (I set it to 400x400 pixels), then classifies the file and then the results are classified and saved or discarded by the user.</a><br>
+                <br>
+                <!---->
+                <a>Image size check</a><br>
+                <a><img src="{{ url_for('static', filename='images/image_size_check.PNG') }}"/></a><br>
+                <br>
+                <a>This JavaScript function handleFiles is responsible for checking the dimensions of the uploaded image.</a>
+                <a>It takes a list of files as input, assumes the first file is selected, and checks if its dimensions are 400x400 pixels.</a>
+                <a>If the dimensions are correct, it proceeds to upload the image.</a>
+                <a>Otherwise, it displays an alert prompting the user to upload an image with the required dimensions.</a><br>
+                <br>
+                <!---->
+                <a>Automated image classification</a><br>
+                <a><img src="{{ url_for('static', filename='images/classifyimg.PNG') }}"/></a><br>
+                <br>
+                <a>The setup function initializes the canvas and triggers the classification process.</a>
+                <a>It creates an HTML image element from the uploaded image source and appends it to the HTML 'img' div.</a>
+                <a>Meanwhile, the gotResult function handles the classification result by extracting the label and confidence score.</a>
+                <a>It updates hidden input fields with this information and dynamically creates HTML elements to display the classification result.</a><br>
+                <br>
+                <!---->
+                <a>Workflow</a><br>
+                <a><img src="{{ url_for('static', filename='images/form.PNG') }}"/></a><br>
+                <br>
+                <a>This HTML form represents the workflow for evaluating and saving the classification result.</a>
+                <a>It includes buttons for users to indicate whether the classification is correct or incorrect.</a>
+                <a>JavaScript functions manage the selection of these buttons and ensure that an evaluation is chosen before proceeding with form submission.</a>
+                <a>Upon submission, the classification result can be saved.</a><br>
+                <br>
+            </div>
+            <br>
+            <div class="documentation">
+                <a class="minitopic" style="text-decoration: underline;">Frameworks:</a><br>
+                <br>
+                <a href="https://flask.palletsprojects.com/en/3.0.x/">Flask==3.0.3:</a><br>
+                <a>Flask is a micro web framework written in Python.&nbsp;</a>
+                <a>It is lightweight and provides tools and libraries to help build web applications.</a><br>
+                <br>
+                <a href="https://jinja.palletsprojects.com/en/3.1.x/">Jinja2==3.1.3</a><br>
+                <a>Jinja2 is a modern and designer-friendly templating language for Python, used for creating HTML, XML, or other markup formats.</a><br>
+                <br>
+                <a class="minitopic" style="text-decoration: underline;">Libraries:</a><br>
+                <br>
+                <a href="https://blinker.readthedocs.io/en/stable/">blinker==1.7.0</a><br>
+                <a>Blinker provides fast and simple object-to-object and broadcast signaling for Python objects.</a>
+                <a>It is used for event signaling within a Python application.</a><br>
+                <br>
+                <a href="https://chardet.readthedocs.io/en">chardet==5.2.0</a><br>
+                <a>Chardet is a universal character encoding detector for Python.</a>
+                <a>It can automatically detect a wide range of character encodings.</a><br>
+                <br>
+                <a href="https://click.palletsprojects.com/en/8.1.x/">click==8.1.7</a><br>
+                <a>Click is a Python package for creating command-line interfaces.</a>
+                <a>It makes it easy to write simple scripts and complex command-line applications.</a><br>
+                <br>
+                <a href="https://github.com/tartley/colorama">colorama==0.4.6</a><br>
+                <a>Colorama is a Python package that makes it easy to work with colors in the terminal.</a>
+                <a>It provides simple cross-platform support for colored terminal text.</a><br>
+                <br>
+                <a href="https://importlib-metadata.readthedocs.io/en/latest/">importlib_metadata==7.1.0</a><br>
+                <a>Importlib_metadata provides tools for working with Python distributions.</a>
+                <a>It can extract metadata from Python packages and modules.</a><br>
+                <br>
+                <a href="https://itsdangerous.palletsprojects.com/en/2.2.x/">itsdangerous==2.1.2</a><br>
+                <a>Itsdangerous is a Python library for generating and parsing cryptographically secure tokens.</a>
+                <a>It is commonly used for securely signing data.</a><br>
+                <br>
+                <a href="https://markupsafe.palletsprojects.com/en/2.1.x/">MarkupSafe==2.1.5</a><br>
+                <a>MarkupSafe is a library used by Jinja2 to provide Unicode, string, and byte support.</a>
+                <a>It helps ensure secure string handling in templates.</a><br>
+                <br>
+                <a href="https://packaging.pypa.io/_/downloads/en/stable/pdf/">packaging==24.0</a><br>
+                <a>Packaging is a Python library that provides core utilities for Python package management and distribution.</a>
+                <a>It is used for working with Python packages and metadata.</a><br>
+                <br>
+                <a href="https://pillow.readthedocs.io/en/stable/">pillow==10.3.0</a><br>
+                <a>Pillow is a Python Imaging Library (PIL), which adds image processing capabilities to your Python interpreter.</a>
+                <a>It is used for opening, manipulating, and saving many different image file formats.</a><br>
+                <br>
+                <a href="https://plotly.com/python/">plotly==5.20.0</a><br>
+                <a>Plotly is a Python graphing library that makes interactive, publication-quality graphs online.</a>
+                <a>It is used for creating and sharing interactive, web-based graphs.</a><br>
+                <br>
+                <a href="https://www.reportlab.com/docs/reportlab-userguide.pdf">reportlab==4.1.0</a><br>
+                <a>ReportLab is a Python library that helps to create PDF documents using the Python programming language.</a>
+                <a>It is widely used for generating dynamic PDFs.</a><br>
+                <br>
+                <a href="https://tenacity.readthedocs.io/en/latest/">tenacity==8.2.3</a><br>
+                <a>Tenacity is a general-purpose retrying library to simplify the task of adding retry behavior to Python code.</a>
+                <a>It is commonly used to retry operations that may fail intermittently.</a><br>
+                <br>
+                <a href="https://werkzeug.palletsprojects.com/en/3.0.x/">Werkzeug==3.0.2</a><br>
+                <a>Werkzeug is a comprehensive WSGI (Web Server Gateway Interface) web application library.</a>
+                <a>It is widely used as a foundation for many Python web frameworks and applications.</a><br>
+                <br>
+                <a href="https://zipp.readthedocs.io/en/latest/">zipp==3.18.1</a><br>
+                <a>Zipp is a simple, fast, and safe Python package that provides a way to enumerate directories within a zip archive.</a>
+                <a>It is used for accessing data inside zip archives without needing to extract them.</a><br>
+                <br>
+            </div>
+            <br>
+            <div class="documentation">
+                <a class="minitopic" style="text-decoration: underline;">Structure:</a><br>
+                <br>
+                <a><img style="height: 300px; width: auto;" src="{{ url_for('static', filename='images/structure_EA1.png') }}"/></a><br>
+                <br>
+            </div>
+            <div class="documentation">
+                <a class="minitopic" style="text-decoration: underline;">GitHub:</a><br>
+                <br>
+                <a href="https://github.com/m01101000/DeeplWebapp">You can find more information about the web application on Github.</a><br>
+                <br>
+            </div>
+            <br>
+        </div>
+    </section>
+    <section>
+        <a style="margin-left: 1rem;">This content will only be shown to selected users</a>
+        <div class="grid-container-evaluator">
+            <div class="headline">
+                <a>Additional Sources</a>
+            </div>
+            <br>
+            <div class="documentation">
+                <a>I used <a href="https://responsivevoice.org/">ResponsiveVoice</a> to generate the audio track in the tutorial.</a>
+                <br>
+            </div>
+            <br>
+        </div>
+    </section>
+    {% endif %}
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="ea1-report" id="clickableDiv" style="cursor: pointer;">
+                EA1 Download report
+                <br>
+                <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
+            </div>
+            <script>
+                document.getElementById("clickableDiv").addEventListener("click", function() {
+                    window.location.href = "{{ url_for('ea1report') }}";
+                });
+            </script>
+          </div>
+    </section>
+    
+    <br>
+    <br><br>
+    <footer>
+        <a href='imprint'>Imprint</a>
+    </footer>
+</body>
+</html>

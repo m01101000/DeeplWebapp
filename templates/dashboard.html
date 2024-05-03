@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - {{username}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css')}}" id="site-css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css')}}" id="dashboard-css">
+    <script src="{{ url_for('static', filename='script/dashboard.js') }}"></script>
+</head>
+<body>
+    
+    <div class="mobile-nav-button-open">
+        <div>
+            <img src="{{ url_for('static', filename='images/menu.png') }}" style="width: 2rem; height: 2rem; margin: 2rem;" onclick="toggleMenu()"/>
+            <a>Dashboard</a>
+        </div>
+    </div>
+
+    <nav class='navbar-mobile' id="navbar-mobile">
+        <br>
+        <div>
+            <a class='mobile-selectedmenu' href='tutorials'>Tutorials</a>
+            <br><br>
+            <a class='mobile-selectedmenu' href='EA1'>EA 1</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <br><br>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <br><br>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+
+    <nav class='navbar'>
+        <div>
+            <a>Dashboard</a>
+        </div>
+        <div>
+            <a class='selectedmenu' href='tutorials'>Tutorials</a>
+            <a class='selectedmenu' href='EA1'>EA 1</a>
+            <a style='text-decoration: line-through;'>EA 2</a>
+            <a style='text-decoration: line-through;'>EA 3</a>
+        </div>
+        <div>
+            <a class='logout' href='logout'>Logout</a>
+        </div>
+    </nav>
+    <br>
+
+    <section id="section">
+        <div class="grid-container">
+            <div class="headline" onclick="window.location.href='/EA1'">
+                <a>EA 1: Image classification with ml5</a>
+            </div>
+            <div class="imageside" onclick="window.location.href='/EA1'">
+                <a>Image overview</a>
+                <br><br>
+                <a style="font-size: xx-large;">{{ analyzedimages }}</a><a>analyzed images</a>
+            </div>
+            <div class="resultside" onclick="window.location.href='/EA1'">
+                <a>Result overview</a>
+                <br><br>
+                <a style="font-size: xx-large;">{{ averageconfidence }}</a><a>average confidence</a>
+            </div>
+            <div class="report1" id="clickableDiv" style="cursor: pointer;">
+                <a>Download report</a>
+                <br><br>
+                <img src="{{ url_for('static', filename='images/pdf.png') }}" class="image"/>
+            </div>
+            <script>
+                document.getElementById("clickableDiv").addEventListener("click", function() {
+                    window.location.href = "{{ url_for('ea1report') }}";
+                });
+            </script>
+          </div>
+    </section>
+
+    <section id="section">
+        <div class="grid-container-default">
+            <div class="headline-default">
+                EA 2:
+            </div>
+            <div class="placeholder">
+                coming soon
+            </div>
+          </div>
+    </section>
+    <section id="section">
+        <div class="grid-container-default">
+            <div class="headline-default">
+                <a>EA 3:</a>
+            </div>
+            <div class="placeholder">
+                <a>coming soon</a>
+            </div>
+          </div>
+    </section>
+    <br>    
+    <br><br>
+    <footer>
+        <a href='imprint'>Imprint</a>
+    </footer>
+</body>
+</html>
